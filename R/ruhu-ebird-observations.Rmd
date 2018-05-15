@@ -13,7 +13,8 @@ This file is licensed with the Creative Commons Attribution 4.0 International Li
 knitr::opts_chunk$set(echo = TRUE, fig.height = 6,
                       fig.width = 8, fig.align = 'center',
                       warning = FALSE, message = FALSE,
-                      cache = TRUE)
+                      cache = TRUE, 
+                      fig.path = "ruhu-ebird-observations_files/figure-markdown_github/")
 
 library(rebird) #get eBird data from the web
 library(dplyr) #data munging
@@ -369,3 +370,67 @@ ruhu_since_2002 %>%
   add_phylopic(better_hummer, alpha = .7, color = "orange3", ysize = 3, x = 45, y = .3)
 
 ```
+
+#### Update May 14 2018
+
+There has been discussion on the local birding listserve as to whether or not it is
+still looking like a poor year for Rufous Hummingbirds. So let's look at what 
+this week in 2018 looks like compared to the same week in previous years. 
+We'll subset the data to get frequencies of observations of RUHU just for this week. 
+We can plot the distribution of frequencies to get an idea of what "normal" looks like
+in B.C. as well as coastal US states:
+
+```{r}
+this_week <- max(ruhu_since_2002$week[ruhu_since_2002$year == 2018])
+df_this_week <- filter(ruhu_since_2002, week == this_week)
+
+freq_plot <- ggplot(df_this_week, aes(x = frequency)) + 
+  geom_density() + 
+  facet_grid(state ~ ., scales = "free_y") + 
+  theme_minimal() + 
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+plot(freq_plot)
+```
+
+Then, we can plot the frequency of observation *this year* as a red vertical line 
+on top of those distributions and compare to "normal" (a red line closer to the peak of 
+the distribution means close to normal):
+
+```{r}
+freq_plot + 
+geom_vline(data = df_this_week[df_this_week$year == 2018, ], 
+           aes(xintercept = frequency), colour = "red")
+```
+
+Based on this, in B.C. we are right on average for RUHU observations in this 
+week of the year, as is Oregon. Washington is on the low side, but still within
+the normal range.
+
+We can also look more closely at how the frequency of observations in *each week* 
+during migration season in 2018 compares to historical normals.
+
+We essentially generate the same plot as before, but only for B.C., and 
+make one density distribution plot for each week, starting at week 10, and 
+going to now). We can use the very nice [ggridges](https://cran.r-project.org/package=ggridges) package for this:
+
+```{r}
+library(ggridges)
+ruhu_bc_migration_weeks <- filter(ruhu_since_2002, 
+                                  state == "CA-BC", between(week, 10, this_week))
+
+ggplot(ruhu_bc_migration_weeks, 
+       aes(x = frequency, y = week, group = week, fill = week, colour = week)) + 
+  geom_density_ridges(alpha = 0.7) + 
+  theme_ridges() + 
+  geom_segment(data = filter(ruhu_bc_migration_weeks, year == 2018), 
+               aes(x = frequency, xend = frequency, y = week, yend = week - 1), 
+               size = 1, colour = "red") + 
+  scale_colour_viridis_c(guide = "none") + 
+  scale_fill_viridis_c(guide = "none") + 
+  scale_y_reverse(breaks = seq(10, this_week, by = 2))
+```
+
+With the exception of this week, most of the 2018 values are in the left side of 
+the distribution, meaning on the lower side of normal... but nothing out of the 
+ordinary.

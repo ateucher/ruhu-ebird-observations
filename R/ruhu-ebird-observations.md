@@ -2,33 +2,52 @@
 <!-- 
 This file is licensed with the Creative Commons Attribution 4.0 International License. 
 -->
-Where aRe the Rufous Hummingbirds?
-==================================
+
+# Where aRe the Rufous Hummingbirds?
 
 <img src = "../images/vnhs_ruhu_tweet.png" width = "500"></img>
 
-When I saw the above analysis by my friend [Dave Fraser](https://twitter.com/DavidFFraser), I thought 💭:
+When I saw the above analysis by my friend [Dave
+Fraser](https://twitter.com/DavidFFraser), I thought 💭:
 
--   cool analysis!
--   citizen science + [eBird](https://ebird.org/) is awesome!
--   have I seen a Rufous Hummingbird 🐦 lately?
+  - cool analysis\!
+  - citizen science + [eBird](https://ebird.org/) is awesome\!
+  - have I seen a Rufous Hummingbird 🐦 lately?
 
-and *then* I thought ...
+and *then* I thought …
 
--   maybe you could do that analysis in R? 💡
+  - maybe you could do that analysis in R? 💡
 
 And it turns out you can.
 
-Getting the [eBird](https://ebird.org/) Data
---------------------------------------------
+## Getting the [eBird](https://ebird.org/) Data
 
-You can get up-to-date eBird data via the [eBird website's View & Explore options](https://ebird.org/explore), but I was hoping to include more historical data and didn't want to click that often. The [full eBird data set](https://ebird.org/science/download-ebird-data-products) is available for download, but it is updated quarterly—so will not have the very recent observation records we are after. Sigh 😞.
+You can get up-to-date eBird data via the [eBird website’s View &
+Explore options](https://ebird.org/explore), but I was hoping to include
+more historical data and didn’t want to click that often. The [full
+eBird data set](https://ebird.org/science/download-ebird-data-products)
+is available for download, but it is updated quarterly—so will not have
+the very recent observation records we are after. Sigh 😞.
 
-Then I talked to [Andy Teucher](https://github.com/ateucher) about my eBird data woes. He introduced me to the [rOpenSci](https://ropensci.org/) [R](https://www.r-project.org/) package 📦 [`rebird`](https://cran.r-project.org/web/packages/rebird/index.html)—he is one of the package coauthors! 👍
+Then I talked to [Andy Teucher](https://github.com/ateucher) about my
+eBird data woes. He introduced me to the
+[rOpenSci](https://ropensci.org/) [R](https://www.r-project.org/)
+package 📦
+[`rebird`](https://cran.r-project.org/web/packages/rebird/index.html)—he
+is one of the package coauthors\! 👍
 
-The [`rebird`](https://cran.r-project.org/web/packages/rebird/index.html) package 📦 provides an interface with the eBird webservices—which in regular english means it goes and gets the eBird data from the web. It also returns the data in a [tidy](https://www.jstatsoft.org/article/view/v059i10) format, meaning the data are ready to work with the popular [tidyverse R packages](https://www.tidyverse.org/) 📦 that many of us new to R have used to ease our way into coding.
+The
+[`rebird`](https://cran.r-project.org/web/packages/rebird/index.html)
+package 📦 provides an interface with the eBird webservices—which in
+regular english means it goes and gets the eBird data from the web. It
+also returns the data in a
+[tidy](https://www.jstatsoft.org/article/view/v059i10) format, meaning
+the data are ready to work with the popular [tidyverse R
+packages](https://www.tidyverse.org/) 📦 that many of us new to R have
+used to ease our way into coding.
 
-OK, so let's start by pulling *A LOT* of eBird data—50 years seems like a lot?
+OK, so let’s start by pulling *A LOT* of eBird data—50 years seems like
+a lot?
 
 ``` r
 #load R packages we will need for getting the data
@@ -57,19 +76,28 @@ head(ruhu_raw)
     ## # A tibble: 6 x 6
     ##   comName            monthQt    frequency sampleSize  year state
     ##   <chr>              <chr>          <dbl>      <dbl> <int> <chr>
-    ## 1 Rufous Hummingbird January-1         0.        14.  1968 CA-BC
-    ## 2 Rufous Hummingbird January-2         0.         9.  1968 CA-BC
-    ## 3 Rufous Hummingbird January-3         0.        11.  1968 CA-BC
-    ## 4 Rufous Hummingbird January-4         0.        14.  1968 CA-BC
-    ## 5 Rufous Hummingbird February-1        0.        15.  1968 CA-BC
-    ## 6 Rufous Hummingbird February-2        0.        14.  1968 CA-BC
+    ## 1 Rufous Hummingbird January-1          0         14  1968 CA-BC
+    ## 2 Rufous Hummingbird January-2          0          9  1968 CA-BC
+    ## 3 Rufous Hummingbird January-3          0         11  1968 CA-BC
+    ## 4 Rufous Hummingbird January-4          0         14  1968 CA-BC
+    ## 5 Rufous Hummingbird February-1         0         15  1968 CA-BC
+    ## 6 Rufous Hummingbird February-2         0         14  1968 CA-BC
 
-The eBird data provided by [`rebird`](https://cran.r-project.org/web/packages/rebird/index.html) is indeed very tidy. 🎁 Let's take a moment to cheers the [authors of and contributers to](https://github.com/ropensci/rebird/graphs/contributors) this open source R package. 🎉
+The eBird data provided by
+[`rebird`](https://cran.r-project.org/web/packages/rebird/index.html) is
+indeed very tidy. 🎁 Let’s take a moment to cheers the [authors of and
+contributers to](https://github.com/ropensci/rebird/graphs/contributors)
+this open source R package. 🎉
 
-Some Data Wrangling
--------------------
+## Some Data Wrangling
 
-There is still a bit of data cleaning or wrangling to do—there alway is and it would be less fun if there wasn't 😉. We need to do something with the `monthQt` variable. This is our time variable, which we need for plotting. Right now it is coded as a character variable and it needs to be recognized as a date. And you might notice some zeros in the 2018 weeks that we have not yet lived—or birded. Let's filter out those zeros, they should really have been `NA`s?
+There is still a bit of data cleaning or wrangling to do—there alway is
+and it would be less fun if there wasn’t 😉. We need to do something with
+the `monthQt` variable. This is our time variable, which we need for
+plotting. Right now it is coded as a character variable and it needs to
+be recognized as a date. And you might notice some zeros in the 2018
+weeks that we have not yet lived—or birded. Let’s filter out those
+zeros, they should really have been `NA`s?
 
 ``` r
 #we need a few more packages
@@ -95,19 +123,19 @@ head(ruhu_clean)
     ## # A tibble: 6 x 9
     ##   comName    month  week frequency sampleSize  year state   day date      
     ##   <chr>      <chr> <dbl>     <dbl>      <dbl> <int> <chr> <dbl> <date>    
-    ## 1 Rufous Hu… Janu…    1.        0.        14.  1968 CA-BC    1. 1968-01-01
-    ## 2 Rufous Hu… Janu…    2.        0.         9.  1968 CA-BC    8. 1968-01-08
-    ## 3 Rufous Hu… Janu…    3.        0.        11.  1968 CA-BC   15. 1968-01-15
-    ## 4 Rufous Hu… Janu…    4.        0.        14.  1968 CA-BC   23. 1968-01-23
-    ## 5 Rufous Hu… Febr…    5.        0.        15.  1968 CA-BC    1. 1968-02-01
-    ## 6 Rufous Hu… Febr…    6.        0.        14.  1968 CA-BC    8. 1968-02-08
+    ## 1 Rufous Hu… Janu…     1         0         14  1968 CA-BC     1 1968-01-01
+    ## 2 Rufous Hu… Janu…     2         0          9  1968 CA-BC     8 1968-01-08
+    ## 3 Rufous Hu… Janu…     3         0         11  1968 CA-BC    15 1968-01-15
+    ## 4 Rufous Hu… Janu…     4         0         14  1968 CA-BC    23 1968-01-23
+    ## 5 Rufous Hu… Febr…     5         0         15  1968 CA-BC     1 1968-02-01
+    ## 6 Rufous Hu… Febr…     6         0         14  1968 CA-BC     8 1968-02-08
 
-That looks 👀 better!
+That looks 👀 better\!
 
-Some Exploratory Data Visualizing
----------------------------------
+## Some Exploratory Data Visualizing
 
-Now let's have a quick, exploratory look 👀 at what data we have, starting just with British Columbia.
+Now let’s have a quick, exploratory look 👀 at what data we have,
+starting just with British Columbia.
 
 ``` r
 #we need another package
@@ -122,7 +150,10 @@ ruhu_clean %>%
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/pre-viz-1.png" style="display: block; margin: auto;" />
 
-There seems to be a lot of very high frequency values in the data set (frequency = 1.0), which is a bit puzzling—all the birds observed were Rufous Hummingbirds ❓. Let's colour the lines for each year—using a continuous colour scale—to see if we learn something.
+There seems to be a lot of very high frequency values in the data set
+(frequency = 1.0), which is a bit puzzling—all the birds observed were
+Rufous Hummingbirds ❓. Let’s colour the lines for each year—using a
+continuous colour scale—to see if we learn something.
 
 ``` r
 ruhu_clean %>% 
@@ -134,7 +165,12 @@ ruhu_clean %>%
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/colour-years-1.png" style="display: block; margin: auto;" />
 
-Hmmmmm...this shows that most of that puzzling data is pre-2000s. eBird launched in 2002, with birders able to enter observations instantly via smartphones. Andy—a birder and contributor to eBird—mentioned that maybe the older records are being entered by birders going through past checklists & field notebooks. Filtering out the pre-2002 data seems like a reasonable approach?
+Hmmmmm…this shows that most of that puzzling data is pre-2000s. eBird
+launched in 2002, with birders able to enter observations instantly via
+smartphones. Andy—a birder and contributor to eBird—mentioned that maybe
+the older records are being entered by birders going through past
+checklists & field notebooks. Filtering out the pre-2002 data seems like
+a reasonable approach?
 
 ``` r
 ruhu_since_2002 <- ruhu_clean %>% 
@@ -149,12 +185,12 @@ ruhu_since_2002 %>%
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/filter-years-1.png" style="display: block; margin: auto;" />
 
-Looks 👀 better!
+Looks 👀 better\!
 
-How Do 2018 🐦 Observation Frequencies Compare with Historical Data?
--------------------------------------------------------------------
+## How Do 2018 🐦 Observation Frequencies Compare with Historical Data?
 
-Let's use some colour to distinguish the 2018 data from the 2002-2017 observation frequencies.
+Let’s use some colour to distinguish the 2018 data from the 2002-2017
+observation frequencies.
 
 ``` r
 #make a small df with just 2018 data
@@ -174,9 +210,11 @@ ruhu_since_2002 %>%
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/bc-plot-1.png" style="display: block; margin: auto;" />
 
-This plot confirms the original analysis with the first 2018 Rufous Hummingbird observations later than most years since 2002. However, the rate of increase in observation frequency seems to be similar.
+This plot confirms the original analysis with the first 2018 Rufous
+Hummingbird observations later than most years since 2002. However, the
+rate of increase in observation frequency seems to be similar.
 
-Let's look at all the Pacific Coast data now?
+Let’s look at all the Pacific Coast data now?
 
 ``` r
 #make a small df with just 2018 data
@@ -196,7 +234,10 @@ ruhu_since_2002 %>%
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/wc-plot-1.png" style="display: block; margin: auto;" />
 
-Interesting! But wait, while I'd like California to be a bit closer to British Columbia, I think I want the order of my facet plots to mirror the order along the Pacific Coast. Let's make sure the variable `state` is a factor *and* in the order we want for plotting.
+Interesting\! But wait, while I’d like California to be a bit closer to
+British Columbia, I think I want the order of my facet plots to mirror
+the order along the Pacific Coast. Let’s make sure the variable `state`
+is a factor *and* in the order we want for plotting.
 
 ``` r
 #we need another package
@@ -226,11 +267,16 @@ ruhu_since_2002 %>%
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/wc-plot-ordered-1.png" style="display: block; margin: auto;" />
 
-Looks 👀 better!
+Looks 👀 better\!
 
-And again, the plot confirms the original analysis—first observations are later and frequencies are lower for Rufous Hummingbirds, especially in Oregon, Washington and British Columbia.
+And again, the plot confirms the original analysis—first observations
+are later and frequencies are lower for Rufous Hummingbirds, especially
+in Oregon, Washington and British Columbia.
 
-Let's finish up with some window dressing for our plots, adding the usual suspects like a title and data attribution, and adding a nice silhouette of a hummingbird using the `rphylopic` R package 📦. Andy even suggested using the rufous colour—💯.
+Let’s finish up with some window dressing for our plots, adding the
+usual suspects like a title and data attribution, and adding a nice
+silhouette of a hummingbird using the `rphylopic` R package 📦. Andy even
+suggested using the rufous colour—💯.
 
 So final plot for **British Columbia**:
 
@@ -294,13 +340,22 @@ ruhu_since_2002 %>%
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/nice-wc-plot-1.png" style="display: block; margin: auto;" />
 
-OK, I know. The silhouette is *not* a Rufous Hummingbird. It is a *Topazza pella*—the Crimson Topaz—the only hummingbird image in the [phylopic library](http://phylopic.org/name/11887b47-ae28-4389-aaf8-16e204197b5b). At least it is a hummingbird?
+OK, I know. The silhouette is *not* a Rufous Hummingbird. It is a
+*Topazza pella*—the Crimson Topaz—the only hummingbird image in the
+[phylopic
+library](http://phylopic.org/name/11887b47-ae28-4389-aaf8-16e204197b5b).
+At least it is a hummingbird?
 
-For more on Rufous Hummingbirds (*Selasphorus rufus*), you can read the [species account in the The Birds of North America series](https://birdsna.org/Species-Account/bna/species/rufhum/introduction).
+For more on Rufous Hummingbirds (*Selasphorus rufus*), you can read the
+[species account in the The Birds of North America
+series](https://birdsna.org/Species-Account/bna/species/rufhum/introduction).
 
-For keeping up with cool nature stuff in Victoria, British Columbia, you can follow the [Victoria Natural History Society twitter feed](https://twitter.com/VictoriaNHS).
+For keeping up with cool nature stuff in Victoria, British Columbia, you
+can follow the [Victoria Natural History Society twitter
+feed](https://twitter.com/VictoriaNHS).
 
-If you see 👀 a Rufous Hummingbird, you can add your observation to [eBird](https://ebird.org/).
+If you see 👀 a Rufous Hummingbird, you can add your observation to
+[eBird](https://ebird.org/).
 
 <br>
 
@@ -308,10 +363,91 @@ If you see 👀 a Rufous Hummingbird, you can add your observation to [eBird](ht
 
 <img src = "../images/phylopic_tweet.png" width = "500"></img>
 
-If you want to wrangle the [full eBird data set](https://ebird.org/science/download-ebird-data-products), you might want to check out the [R](https://www.r-project.org/) package 📦 [`AUK`](https://cran.r-project.org/web/packages/auk/index.html), also recently onboarded at [rOpenSci](https://ropensci.org/).
+If you want to wrangle the [full eBird data
+set](https://ebird.org/science/download-ebird-data-products), you might
+want to check out the [R](https://www.r-project.org/) package 📦
+[`AUK`](https://cran.r-project.org/web/packages/auk/index.html), also
+recently onboarded at [rOpenSci](https://ropensci.org/).
 
-And thanks to the above tweet from [phylopic](https://twitter.com/PhyloPic), we have a final, final set of plots with an improved hummingbird image 😄.
+And thanks to the above tweet from
+[phylopic](https://twitter.com/PhyloPic), we have a final, final set of
+plots with an improved hummingbird image
+😄.
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/final-bc-plot-1.png" style="display: block; margin: auto;" />
 
 <img src="ruhu-ebird-observations_files/figure-markdown_github/final-wc-plot-1.png" style="display: block; margin: auto;" />
+
+#### Update May 14 2018
+
+There has been discussion on the local birding listserve as to whether
+or not it is still looking like a poor year for Rufous Hummingbirds. So
+let’s look at what this week in 2018 looks like compared to the same
+week in previous years. We’ll subset the data to get frequencies of
+observations of RUHU just for this week. We can plot the distribution of
+frequencies to get an idea of what “normal” looks like in B.C. as well
+as coastal US states:
+
+``` r
+this_week <- max(ruhu_since_2002$week[ruhu_since_2002$year == 2018])
+df_this_week <- filter(ruhu_since_2002, week == this_week)
+
+freq_plot <- ggplot(df_this_week, aes(x = frequency)) + 
+  geom_density() + 
+  facet_grid(state ~ ., scales = "free_y") + 
+  theme_minimal() + 
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+
+plot(freq_plot)
+```
+
+<img src="ruhu-ebird-observations_files/figure-markdown_github/unnamed-chunk-1-1.png" style="display: block; margin: auto;" />
+
+Then, we can plot the frequency of observation *this year* as a red
+vertical line on top of those distributions and compare to “normal” (a
+red line closer to the peak of the distribution means close to normal):
+
+``` r
+freq_plot + 
+geom_vline(data = df_this_week[df_this_week$year == 2018, ], 
+           aes(xintercept = frequency), colour = "red")
+```
+
+<img src="ruhu-ebird-observations_files/figure-markdown_github/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+
+Based on this, in B.C. we are right on average for RUHU observations in
+this week of the year, as is Oregon. Washington is on the low side, but
+still within the normal range.
+
+We can also look more closely at how the frequency of observations in
+*each week* during migration season in 2018 compares to historical
+normals.
+
+We essentially generate the same plot as before, but only for B.C., and
+make one density distribution plot for each week, starting at week 10,
+and going to now). We can use the very nice
+[ggridges](https://cran.r-project.org/package=ggridges) package for
+this:
+
+``` r
+library(ggridges)
+ruhu_bc_migration_weeks <- filter(ruhu_since_2002, 
+                                  state == "CA-BC", between(week, 10, this_week))
+
+ggplot(ruhu_bc_migration_weeks, 
+       aes(x = frequency, y = week, group = week, fill = week, colour = week)) + 
+  geom_density_ridges(alpha = 0.7) + 
+  theme_ridges() + 
+  geom_segment(data = filter(ruhu_bc_migration_weeks, year == 2018), 
+               aes(x = frequency, xend = frequency, y = week, yend = week - 1), 
+               size = 1, colour = "red") + 
+  scale_colour_viridis_c(guide = "none") + 
+  scale_fill_viridis_c(guide = "none") + 
+  scale_y_reverse(breaks = seq(10, this_week, by = 2))
+```
+
+<img src="ruhu-ebird-observations_files/figure-markdown_github/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
+
+With the exception of this week, most of the 2018 values are in the left
+side of the distribution, meaning on the lower side of normal… but
+nothing out of the ordinary.
